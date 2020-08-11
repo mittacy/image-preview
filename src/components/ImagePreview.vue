@@ -35,6 +35,7 @@
     height: 100%;
     cursor: pointer;
     box-shadow: 0 0.5px 3px rgba(0, 0, 0, 0.15);
+    user-select: none;
   }
   .arrow:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
@@ -72,13 +73,13 @@
                     return value > 0
                 }
             },
-            photoWidth: {
+            width: {
                 default: 300,
                 validator: function(value) {
                     return value > 0
                 }
             },
-            photoHeight: {
+            height: {
                 default: 600,
                 validator: function(value) {
                     return value > 0
@@ -90,12 +91,15 @@
                     return value > 0
                 }
             },
-            photoUrls: {
+            photoList: {
                 type: Array,
-                required: true
+                required: true,
+                validator: function(value) {
+                    return value.length > 0
+                }
             },
-            initPhotoIndex: {
-                default: 0,
+            value: {
+                required: true,
                 validator: function(value) {
                     return value >= 0
                 }
@@ -108,87 +112,95 @@
         data() {
             return {
                 idStyle: {
-                    height: this.photoHeight + 'px'
+                    height: this.height + 'px'
                 },
                 showUrls: [],
                 leftIndex: 0,
                 rightIndex: 0,
                 photoSliderStyle: {
-                    width: this.showNumber * this.photoWidth + this.photosGap * (this.showNumber-1) + 'px',
+                    width: this.showNumber * this.width + this.photosGap * (this.showNumber-1) + 'px',
                 },
                 photoStyle: {
-                    width: this.photoWidth + 'px',
-                    height: this.photoHeight + 'px',
+                    width: this.width + 'px',
+                    height: this.height + 'px',
                     marginRight: this.photosGap + 'px'
                 },
-                photoSliderLoccation: -(this.photosGap + this.photoWidth),  
+                photoSliderLoccation: -(this.photosGap + this.width),  
             }
         },
         methods: {
             // 初始化展示数组 showUrls
             initShowUrls() {
                 // 1. 初始化 leftIndex&rightIndex
-                if (this.initPhotoIndex == 0) {
-                    this.leftIndex = this.photoUrls.length-1
+                if (this.value === 0) {
+                    this.leftIndex = this.photoList.length-2
+                } else if (this.value === 1) {
+                    this.leftIndex = this.photoList.length-1
                 } else {
-                    this.leftIndex = this.initPhotoIndex-1
+                    this.leftIndex = this.value-2
                 }
                 this.rightIndex = this.leftIndex + this.showNumber + 1
-                if (this.rightIndex > this.photoUrls.length-1) {
-                    this.rightIndex = this.rightIndex - (this.photoUrls.length-1) - 1
+                if (this.rightIndex > this.photoList.length-1) {
+                    this.rightIndex = this.rightIndex - (this.photoList.length-1) - 1
                 }
-                // 2. 根据leftIndex&rightIndex，到 photoUrls 截取 showUrls
+                // 2. 根据leftIndex&rightIndex，到 photoList 截取 showUrls
                 if (this.leftIndex < this.rightIndex) {
-                    this.showUrls = this.photoUrls.slice(this.leftIndex, this.rightIndex+1)
+                    this.showUrls = this.photoList.slice(this.leftIndex, this.rightIndex+1)
                 } else {
-                    this.showUrls = this.photoUrls.slice(this.leftIndex).concat(this.photoUrls.slice(0, this.rightIndex+1))
+                    this.showUrls = this.photoList.slice(this.leftIndex).concat(this.photoList.slice(0, this.rightIndex+1))
                 }
-            },
-            moveSlider(isLeft) {
-                if (isLeft) {
-                    let temp = this.showUrls[0]
-                    this.showUrls = this.showUrls.slice(1).concat(temp)
-                } else {
-                    let temp = [this.showUrls[this.showUrls.length-1]]
-                    this.showUrls = this.showUrls.slice(0, this.showUrls.length-1)
-                    this.showUrls = temp.concat(this.showUrls)
-                }
+                console.log("init: ", this.value, ", left: ", this.leftIndex, ", right: ", this.rightIndex )
             },
             changeShowUrls(isLeft) {
                 if (isLeft) {
                     // 1. 移动动画
                     // 2. 删除左边一个元素, 并同步 leftIndex
                     this.showUrls = this.showUrls.slice(1)
-                    if (this.leftIndex == this.photoUrls.length-1) {
+                    if (this.leftIndex === this.photoList.length-1) {
                         this.leftIndex = 0
                     } else {
                         this.leftIndex = this.leftIndex+1
                     }
                     // 3. 定位右边元素, 并同步 rightIndex
-                    if (this.rightIndex == this.photoUrls.length-1) {
+                    if (this.rightIndex === this.photoList.length-1) {
                         this.rightIndex = 0
                     } else {
                         this.rightIndex = this.rightIndex+1
                     }
                     // 4. 添加右边元素到 showUrls
-                    this.showUrls = this.showUrls.concat(this.photoUrls[this.rightIndex])
+                    this.showUrls = this.showUrls.concat(this.photoList[this.rightIndex])
                 } else {
                     // 1. 移动动画
                     // 2. 删除右边一个元素, 并同步 rightIndex
                     this.showUrls = this.showUrls.slice(0, this.showUrls.length-1)
-                    if (this.rightIndex == 0) {
-                        this.rightIndex = this.photoUrls.length-1
+                    if (this.rightIndex === 0) {
+                        this.rightIndex = this.photoList.length-1
                     } else {
                         this.rightIndex = this.rightIndex-1
                     }
                     // 3. 定位左边元素, 并同步 leftIndex
-                    if (this.leftIndex == 0) {
-                        this.leftIndex = this.photoUrls.length-1
+                    if (this.leftIndex === 0) {
+                        this.leftIndex = this.photoList.length-1
                     } else {
                         this.leftIndex = this.leftIndex-1
                     }
                     // 4. 添加左边元素到 showUrls
-                    this.showUrls = [this.photoUrls[this.leftIndex]].concat(this.showUrls)
+                    this.showUrls = [this.photoList[this.leftIndex]].concat(this.showUrls)
+                }
+                if (this.leftIndex === this.photoList.length-1) {
+                    this.$emit('on-change', 0)
+                } else {
+                    this.$emit('on-change', this.leftIndex+1)
+                }
+            }
+        },
+        computed: {
+            _value: {
+                get () {
+                    return this.value
+                },
+                set (value) {
+                    this.$emit('input', value)
                 }
             }
         }

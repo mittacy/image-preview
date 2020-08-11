@@ -2,11 +2,12 @@
   <div id="app">
     <image-preview
       :showNumber="3"
-      :photoWidth="300"
-      :photoHeight="600"
+      :width="300"
+      :height="600"
       :photosGap="10"
-      :initPhotoIndex="0"
-      :photoUrls="photoUrlsArr">
+      :value="0"
+      :photoList="photoUrlsArr"
+      @on-change="changeImage">
     </image-preview>
   </div>
 </template>
@@ -41,6 +42,11 @@ export default {
   },
   components: {
     ImagePreview
+  },
+  methods: {
+    changeImage(index) {
+      console.log("第一张卡片切换为: ", index)
+    }
   }
 }
 </script>
