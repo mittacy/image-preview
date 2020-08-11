@@ -2,10 +2,10 @@
   <div id="app">
     <image-preview
       :showNumber="3"
-      :width="300"
-      :height="600"
+      :width="200"
+      :height="400"
       :photosGap="10"
-      :value="0"
+      :value="2"
       :photoList="photoUrlsArr"
       @on-change="changeImage">
     </image-preview>
@@ -36,7 +36,7 @@ export default {
         "/imgs/3.png",
         "/imgs/4.png",
         "/imgs/5.png",
-        "/imgs/6.png",
+        "/imgs/6.png"
       ]
     }
   },
@@ -45,7 +45,7 @@ export default {
   },
   methods: {
     changeImage(index) {
-      console.log("第一张卡片切换为: ", index)
+      console.log("index: ", index)
     }
   }
 }

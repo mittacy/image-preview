@@ -1,12 +1,15 @@
 <template>
   <div class="photo-preview" :style="idStyle">
-    <div class="arrow arrow-left" @click="changeShowUrls(true)">
+    <div
+        class="arrow"
+        :class="{'arrow-unactive': leftUnActive}"
+        @click="changeShowUrls(true)">
       <i class="iconfont icon-left"></i>
     </div>
     <div class="photo-slider-wrap" :style="photoSliderStyle">
       <div
         class="photo-slider"
-        :style="{left: photoSliderLoccation+'px'}">
+        :style="{left: photoSliderLocation+'px'}">
         <div
             class="photo"
             :style="photoStyle"
@@ -16,7 +19,10 @@
         </div>
       </div>
     </div>
-    <div class="arrow arrow-right" @click="changeShowUrls(false)">
+    <div
+        class="arrow"
+        :class="{'arrow-unactive': rightUnActive}"
+        @click="changeShowUrls(false)">
       <i class="iconfont icon-right"></i>
     </div>
   </div>
@@ -26,6 +32,7 @@
 .photo-preview {
   display: flex;
   flex-direction: row;
+  user-select: none;
   .arrow {
     display: flex;
     flex-direction: column;
@@ -35,10 +42,13 @@
     height: 100%;
     cursor: pointer;
     box-shadow: 0 0.5px 3px rgba(0, 0, 0, 0.15);
-    user-select: none;
   }
   .arrow:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  }
+  .arrow-unactive {
+    opacity: 0.4;
+    pointer-events: none;
   }
   .iconfont {
     font-size: 20px;
@@ -70,17 +80,17 @@
             showNumber: {
                 default: 3,
                 validator: function(value) {
-                    return value > 0
+                    return value >= 2
                 }
             },
             width: {
-                default: 300,
+                default: 200,
                 validator: function(value) {
                     return value > 0
                 }
             },
             height: {
-                default: 600,
+                default: 400,
                 validator: function(value) {
                     return value > 0
                 }
@@ -99,15 +109,11 @@
                 }
             },
             value: {
-                required: true,
+                default: 2,
                 validator: function(value) {
-                    return value >= 0
+                    return value >= 1
                 }
             }
-        },
-        created() {
-            // 初始化卡片展示数组 showUrls
-            this.initShowUrls()
         },
         data() {
             return {
@@ -115,8 +121,6 @@
                     height: this.height + 'px'
                 },
                 showUrls: [],
-                leftIndex: 0,
-                rightIndex: 0,
                 photoSliderStyle: {
                     width: this.showNumber * this.width + this.photosGap * (this.showNumber-1) + 'px',
                 },
@@ -125,73 +129,8 @@
                     height: this.height + 'px',
                     marginRight: this.photosGap + 'px'
                 },
-                photoSliderLoccation: -(this.photosGap + this.width),  
-            }
-        },
-        methods: {
-            // 初始化展示数组 showUrls
-            initShowUrls() {
-                // 1. 初始化 leftIndex&rightIndex
-                if (this.value === 0) {
-                    this.leftIndex = this.photoList.length-2
-                } else if (this.value === 1) {
-                    this.leftIndex = this.photoList.length-1
-                } else {
-                    this.leftIndex = this.value-2
-                }
-                this.rightIndex = this.leftIndex + this.showNumber + 1
-                if (this.rightIndex > this.photoList.length-1) {
-                    this.rightIndex = this.rightIndex - (this.photoList.length-1) - 1
-                }
-                // 2. 根据leftIndex&rightIndex，到 photoList 截取 showUrls
-                if (this.leftIndex < this.rightIndex) {
-                    this.showUrls = this.photoList.slice(this.leftIndex, this.rightIndex+1)
-                } else {
-                    this.showUrls = this.photoList.slice(this.leftIndex).concat(this.photoList.slice(0, this.rightIndex+1))
-                }
-                console.log("init: ", this.value, ", left: ", this.leftIndex, ", right: ", this.rightIndex )
-            },
-            changeShowUrls(isLeft) {
-                if (isLeft) {
-                    // 1. 移动动画
-                    // 2. 删除左边一个元素, 并同步 leftIndex
-                    this.showUrls = this.showUrls.slice(1)
-                    if (this.leftIndex === this.photoList.length-1) {
-                        this.leftIndex = 0
-                    } else {
-                        this.leftIndex = this.leftIndex+1
-                    }
-                    // 3. 定位右边元素, 并同步 rightIndex
-                    if (this.rightIndex === this.photoList.length-1) {
-                        this.rightIndex = 0
-                    } else {
-                        this.rightIndex = this.rightIndex+1
-                    }
-                    // 4. 添加右边元素到 showUrls
-                    this.showUrls = this.showUrls.concat(this.photoList[this.rightIndex])
-                } else {
-                    // 1. 移动动画
-                    // 2. 删除右边一个元素, 并同步 rightIndex
-                    this.showUrls = this.showUrls.slice(0, this.showUrls.length-1)
-                    if (this.rightIndex === 0) {
-                        this.rightIndex = this.photoList.length-1
-                    } else {
-                        this.rightIndex = this.rightIndex-1
-                    }
-                    // 3. 定位左边元素, 并同步 leftIndex
-                    if (this.leftIndex === 0) {
-                        this.leftIndex = this.photoList.length-1
-                    } else {
-                        this.leftIndex = this.leftIndex-1
-                    }
-                    // 4. 添加左边元素到 showUrls
-                    this.showUrls = [this.photoList[this.leftIndex]].concat(this.showUrls)
-                }
-                if (this.leftIndex === this.photoList.length-1) {
-                    this.$emit('on-change', 0)
-                } else {
-                    this.$emit('on-change', this.leftIndex+1)
-                }
+                photoSliderLocation: 0,
+                index: this.value
             }
         },
         computed: {
@@ -202,7 +141,63 @@
                 set (value) {
                     this.$emit('input', value)
                 }
+            },
+            leftUnActive: {
+                get () {
+                    return this.leftUnActive = this.index+(this.showNumber-2) >= this.photoList.length-1 ? true : false
+                },
+                set(val) {}
+            },
+            rightUnActive: {
+                get () {
+                    return this.rightUnActive = this.index <= 1 ? true : false
+                },
+                set(val) {}
             }
+        },
+        methods: {
+            setShowUrls() {
+                // 根据leftIndex&rightIndex，到 photoList 截取 showUrls
+                let leftIndex = this.index-2
+                let rightIndex = leftIndex + this.showNumber + 1
+                if (leftIndex <= 0) {
+                    this.showUrls = this.photoList.slice(0, rightIndex+1)
+                } else if (rightIndex >= this.photoList.length-1) {
+                    this.showUrls = this.photoList.slice(leftIndex)
+                } else {
+                    this.showUrls = this.photoList.slice(leftIndex, rightIndex+1)
+                }
+            },
+            setSliderLocation() {
+                if (this.index == 0) {
+                    this.photoSliderLocation = this.photosGap + this.width
+                } else if (this.index == 1) {
+                    this.photoSliderLocation = 0
+                } else {
+                    this.photoSliderLocation = -(this.photosGap + this.width)
+                }
+            },
+            changeShowUrls(isLeft) {
+                if (isLeft) {
+                    this.index = this.index + 1
+                } else {
+                    this.index = this.index - 1
+                }
+                this.setShowUrls()
+                this.setSliderLocation()
+                this.$emit('on-change', this.index)
+            }
+        },    
+        created() {
+            // 验证 index 的传入值
+            if (this.index < 1) {
+                this.index = 1
+            } else if (this.index+this.showNumber-2 > this.photoList.length-1) {
+                this.index = this.photoList.length-1-(this.showNumber-2)
+            }
+            // 初始化卡片展示数组 showUrls
+            this.setShowUrls()
+            this.setSliderLocation()
         }
     }
 </script>
