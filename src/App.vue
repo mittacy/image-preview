@@ -1,11 +1,6 @@
 <template>
   <div id="app">
     <image-preview
-      :showNumber="3"
-      :width="200"
-      :height="400"
-      :photosGap="10"
-      :value="2"
       :photoList="photoUrlsArr"
       @on-change="changeImage">
     </image-preview>
