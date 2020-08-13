@@ -8,9 +8,20 @@
 
 ### 使用
 
-1. 将 components 目录下的 ImagePreview 文件复制到项目的 components 目录或其他位置
+1. 导入 阿里云 ifont 链接，在 public/index.html 导入
 
-2. 在需要引入该组件的 vue 文件中导入
+   ```html
+   <head>
+     ……
+   	<link rel="stylesheet" href="//at.alicdn.com/t/font_1996391_z6d55i4tg3.css">
+   </head>
+   ```
+
+   
+
+2. 将 src/components 目录下的 ImagePreview 文件复制到项目的 src/components 目录或其他位置
+
+3. 在需要引入该组件的 vue 文件中导入
 
    ~~~vue
    <template>
@@ -35,12 +46,11 @@
        return {
          // 图片数组
          photoUrlsArr: [
-           "/imgs/1.png",
+           "/imgs/0.png",
            "/imgs/2.png",
            "/imgs/3.png",
            "/imgs/4.png",
-           "/imgs/5.png",
-           "/imgs/6.png"
+           "/imgs/5.png"
          ]
        }
      },
@@ -72,7 +82,7 @@
 
 ### methods
 
-on-change Function
+父组件
 
 ```vue
 <image-preview ...props @on-change="changeImage"></image-preview>
@@ -92,9 +102,22 @@ export default {
 </script>
 ```
 
+子组件
+
+on-change 是在 image-preview 中定义的事件，每次点击按钮滑动的时候会通知父组件
+
+~~~js
+changeShowUrls(isLeft) {
+  // 滑动操作
+  ……
+  // 通知父组件，并带上 index 数据
+  this.$emit('on-change', this.index)
+}
+~~~
+
 ### 优点
 
-​	普通滑动组件，会将传输进来的 photoList 全部缓存在页面中，然后隐藏显示图片之外的所有图片，当数据量小的时候影响不大，但是当数据量达到一定量级时，进入页面加载组件需要加载那么多的 图片url，必然导致页面加载缓慢
+普通滑动组件，会将传输进来的 photoList 全部缓存在页面中，然后隐藏显示图片之外的所有图片，当数据量小的时候影响不大，但是当数据量达到一定量级时，进入页面加载组件需要加载那么多的 图片url，必然导致页面加载缓慢
 
 
 
