@@ -2,28 +2,28 @@
     <div class="photo-preview" :style="idStyle">
         <div
             class="arrow"
-            :class="{'arrow-unactive': leftUnActive}"
+            :class="{'arrow-unactive': leftUnActive, 'arrow-active': !leftUnActive}"
             @click="changeShowUrls(true)">
             <i class="iconfont icon-left"></i>
         </div>
         <div
             class="photo-slider-wrap"
-            :style="{width: photoSliderWidth + 'px'}">
+            :style="{width: photoSliderWidth + 'px', height: height + 'px'}">
             <div
                 class="photo-slider"
                 :style="{left: photoSliderLocation + 'px'}">
                 <div
                     class="photo"
                     :style="photoStyle"
-                    v-for="photoUrl in showUrls"
-                    :key="photoUrl">
+                    v-for="(photoUrl, index) in showUrls"
+                    :key="index">
                     <img :style="photoStyle" :src="photoUrl" />
                 </div>
             </div>
         </div>
         <div
             class="arrow"
-            :class="{'arrow-unactive': rightUnActive}"
+            :class="{'arrow-unactive': rightUnActive, 'arrow-active': !rightUnActive}"
             @click="changeShowUrls(false)">
             <i class="iconfont icon-right"></i>
         </div>
@@ -34,7 +34,10 @@
 .photo-preview {
     display: flex;
     flex-direction: row;
+    align-items: center;
     user-select: none;
+    border-top: 2px solid #1559a0;
+    border-bottom: 2px solid #1559a0;
     .arrow {
         display: flex;
         flex-direction: column;
@@ -42,15 +45,22 @@
         align-items: center;
         width: 40px;
         height: 100%;
+        color: #fff; 
+        transition: background-color .3s;
+        font-size: 30px;
         cursor: pointer;
-        box-shadow: 0 0.5px 3px rgba(0, 0, 0, 0.15);
     }
-    .arrow:hover {
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    .arrow-active {
+        background-color: #1559a0;
+    }
+    .arrow-active:hover {
+        background-color: #0d6dd2;
     }
     .arrow-unactive {
-        opacity: 0.4;
-        pointer-events: none;
+        color: #555;
+        background-color: #e9eaec;
+        // pointer-events: none;
+        cursor: no-drop;
     }
     .iconfont {
         font-size: 20px;
@@ -80,21 +90,25 @@
         name: 'ImagePreview',
         props: {
             showNumber: {
+                type: Number,
                 default: 3
             },
             width: {
+                type: Number,
                 default: 200,
                 validator: function(value) {
                     return value > 0
                 }
             },
             height: {
+                type: Number,
                 default: 400,
                 validator: function(value) {
                     return value > 0
                 }
             },
             photosGap: {
+                type: Number,
                 default: 10,
                 validator: function(value) {
                     return value > 0
@@ -107,6 +121,7 @@
                 }
             },
             value: {
+                type: Number,
                 default: 1,
                 validator: function(value) {
                     return value >= 0
@@ -116,7 +131,8 @@
         data() {
             return {
                 idStyle: {
-                    height: this.height + 'px'
+                    width: this.width * this.showNumber + this.photosGap * (this.showNumber + 1) + 80 + 'px',
+                    height: this.height + 20 + 'px'
                 },
                 showUrls: [],
                 photoSliderWidth: this.showNumber * this.width + this.photosGap * (this.showNumber - 1),
@@ -173,8 +189,14 @@
             },
             changeShowUrls(isLeft) {
                 if (isLeft) {
+                    if (this.leftUnActive) {
+                        return
+                    }
                     this.index = this.index + 1
                 } else {
+                    if (this.rightUnActive) {
+                        return
+                    }
                     this.index = this.index - 1
                 }
                 this.setShowUrls()
