@@ -156,12 +156,12 @@
             },
             leftUnActive: {
                 get () {
-                    return this.index + (this.showNumber - 2) >= this.photoList.length - 1
+                    return this.index <= 1
                 }
             },
             rightUnActive: {
                 get () {
-                    return this.index <= 1
+                    return this.index + (this.showNumber - 2) >= this.photoList.length - 1
                 }
             }
         },
@@ -192,12 +192,12 @@
                     if (this.leftUnActive) {
                         return
                     }
-                    this.index = this.index + 1
+                    this.index = this.index - 1
                 } else {
                     if (this.rightUnActive) {
                         return
                     }
-                    this.index = this.index - 1
+                    this.index = this.index + 1
                 }
                 this.setShowUrls()
                 this.setSliderLocation()
