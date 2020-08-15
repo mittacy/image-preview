@@ -44,7 +44,7 @@ export default {
         "/imgs/10.png",
         "/imgs/11.png"
       ],
-      value: 6
+      value: 5
     }
   },
   components: {

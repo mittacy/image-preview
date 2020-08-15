@@ -209,10 +209,10 @@
         methods: {
             verifyProps() {
                 // 校验纠正 value，由于 value 的卡片始终位于第二个可见位，所以 1 <= value <= this.photoList.length - this.showNumber + 1
-                if (this._value < 1) {
+                if (this.value < 1) {
                     this._value = 1;
                 }
-                else if (this._value > this.photoList.length - this.showNumber + 1) {
+                else if (this.value > this.photoList.length - this.showNumber + 1) {
                     this._value = this.photoList.length - this.showNumber + 1;
                 }
             },
@@ -284,6 +284,7 @@
                 this.$nextTick(() => {
                     // 4. 新增卡片(如果需要)
                     this.addPhoto(isLeftButton);
+                    this.$emit('on-change', this.value);
                 });
             },
             setLeftRightIndex(left, right) {
@@ -352,7 +353,6 @@
             if (this.photoList.length <= 0) {
                 this.photoSliderWrapWidth = 0;
                 this.previewWidth = 0;
-                console.log("设为0, ", this.photoSliderWrapWidth);
                 return;
             }
             // 2. 验证纠正 props 的值
