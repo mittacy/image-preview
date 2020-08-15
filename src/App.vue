@@ -2,7 +2,7 @@
   <div id="app">
     <image-preview
       v-model="value"
-      :showNumber="2"
+      :showNumber="3"
       :width="200"
       :height="400"
       :photosGap="10"
