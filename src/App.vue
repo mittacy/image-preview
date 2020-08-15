@@ -1,11 +1,11 @@
 <template>
   <div id="app">
     <image-preview
-      :showNumber="3"
+      v-model="value"
+      :showNumber="2"
       :width="200"
       :height="400"
       :photosGap="10"
-      :value="1"
       :photoList="photoUrlsArr"
       @on-change="changeImage">
     </image-preview>
@@ -29,14 +29,22 @@ export default {
   name: 'App',
   data() {
     return {
+      // photoUrlsArr: [],
       photoUrlsArr: [
         "/imgs/0.png",
         "/imgs/1.png",
         "/imgs/2.png",
         "/imgs/3.png",
         "/imgs/4.png",
-        "/imgs/5.png"
-      ]
+        "/imgs/5.png",
+        "/imgs/6.png",
+        "/imgs/7.png",
+        "/imgs/8.png",
+        "/imgs/9.png",
+        "/imgs/10.png",
+        "/imgs/11.png"
+      ],
+      value: 6
     }
   },
   components: {
