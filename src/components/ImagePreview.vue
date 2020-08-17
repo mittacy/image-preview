@@ -19,12 +19,15 @@
                         opacity: leftSlider.opacity,
                         transition: 'right .3s ease-out 0s'
                     }">
-                    <img
-                        class="photo"
+                    <div
+                        class="photo-wrap"
                         :style="leftPhotoStyle"
                         v-for="(photoUrl, index) in leftSlider.showUrls"
-                        :src="photoUrl"
-                        :key="index"/>
+                        :key="index">
+                        <img
+                            class="photo"
+                            :src="photoUrl"/>
+                    </div>
                 </div>
                 <div
                     class="photo-slider"
@@ -33,12 +36,15 @@
                         opacity: rightSlider.opacity,
                         transition: 'left .3s ease-out 0s'
                     }">
-                    <img
-                        class="photo"
-                        :style="rightPhotoStyle"
+                    <div
+                        class="photo-wrap"
                         v-for="(photoUrl, index) in rightSlider.showUrls"
-                        :src="photoUrl"
-                        :key="index"/>
+                        :style="rightPhotoStyle"
+                        :key="index">
+                        <img
+                            class="photo"
+                            :src="photoUrl"/>
+                    </div>
                 </div>
             </div>
         </div>
@@ -92,10 +98,17 @@
                 flex-direction: row;
                 justify-content: center;
                 align-items: center;
-                .photo {
-                    border-width: 1px;
-                    border-color: rgba(0,0,0,.4);
-                    border-style: solid;
+                .photo-wrap {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    // background-color: #ccc;
+                    .photo {
+                        border-width: 1px;
+                        border-color: rgba(0,0,0,.4);
+                        border-style: solid;
+                        max-height: 100%;
+                    }
                 }
             }
         }
@@ -345,7 +358,7 @@
                 // 2. 新增卡片(如果需要)
                 this.$nextTick(() => {
                     this.addPhoto(isLeftButton);
-                    this.$emit('on-change', this.value);
+                    this.$emit('before-slide-change', this.value);
                 })
             },
             setLeftRightIndex(left, right) {
