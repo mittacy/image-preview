@@ -3,8 +3,8 @@
     <image-preview
       v-model="value"
       :showNumber="3"
-      :width="200"
-      :height="400"
+      :width="282"
+      :height="500"
       :photosGap="10"
       :photoList="photoUrlsArr"
       @on-change="changeImage">

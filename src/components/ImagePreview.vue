@@ -1,5 +1,5 @@
 <template>
-    <div class="photo-preview" :style="{height: height + 20 + 'px', width: previewWidth + 'px'}">
+    <div class="photo-preview" :style="{height: height + 'px'}">
         <div
             class="arrow"
             :class="{'arrow-unactive': isLeftEnd, 'arrow-active': !isLeftEnd}"
@@ -53,12 +53,12 @@
 
 <style lang="less" scoped>
 .photo-preview {
+    width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     user-select: none;
-    border-top: 2px solid #1559a0;
-    border-bottom: 2px solid #1559a0;
     .arrow {
         display: flex;
         flex-direction: column;
@@ -66,21 +66,16 @@
         align-items: center;
         width: 40px;
         height: 100%;
-        color: #fff; 
+        color: #333;
         transition: background-color .3s;
         font-size: 30px;
         cursor: pointer;
     }
-    .arrow-active {
-        background-color: #1559a0;
-    }
     .arrow-active:hover {
-        background-color: #0d6dd2;
+        color: rgb(81, 90, 110);
     }
     .arrow-unactive {
-        color: #555;
-        background-color: #e9eaec;
-        // pointer-events: none;
+        color: rgb(81, 90, 110);
         cursor: no-drop;
     }
     .iconfont {
@@ -97,6 +92,11 @@
                 flex-direction: row;
                 justify-content: center;
                 align-items: center;
+                .photo {
+                    border-width: 1px;
+                    border-color: rgba(0,0,0,.4);
+                    border-style: solid;
+                }
             }
         }
     }
@@ -387,7 +387,6 @@
             // 1. 设置宽度
             if (this.photoList.length <= 0) {
                 this.photoSliderWrapWidth = 0;
-                this.previewWidth = 0;
                 return;
             }
             // 2. 验证纠正 props 的值
