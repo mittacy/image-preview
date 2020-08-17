@@ -8,10 +8,10 @@
         </div>
         <div
             class="photo-slider-wrap"
-            :style="{height: height + 'px', width: photoSliderWrapWidth + 'px'}">
+            :style="{height: height + 'px', width: this.showNumber * this.width + this.photosGap * (this.showNumber - 1) + 'px'}">
             <div
                 class="photo-slider-hidden"
-                :style="{height: height + 'px', width: photoSliderWrapWidth + 'px'}">
+                :style="{height: height + 'px', width: this.showNumber * this.width + this.photosGap * (this.showNumber - 1) + 'px'}">
                 <div
                     class="photo-slider"
                     :style="{
@@ -21,11 +21,12 @@
                     }">
                     <div
                         class="photo-wrap"
-                        :style="leftPhotoStyle"
+                        :style="[leftPhotoStyle, {width: width + 'px'}]"
                         v-for="(photoUrl, index) in leftSlider.showUrls"
                         :key="index">
                         <img
                             class="photo"
+                            :style="{width: width + 'px', height: height + 'px'}"
                             :src="photoUrl"/>
                     </div>
                 </div>
@@ -38,11 +39,12 @@
                     }">
                     <div
                         class="photo-wrap"
+                        :style="[rightPhotoStyle, {width: width + 'px'}]"
                         v-for="(photoUrl, index) in rightSlider.showUrls"
-                        :style="rightPhotoStyle"
                         :key="index">
                         <img
                             class="photo"
+                            :style="{width: width + 'px', height: height + 'px'}"
                             :src="photoUrl"/>
                     </div>
                 </div>
@@ -102,12 +104,10 @@
                     display: flex;
                     flex-direction: row;
                     justify-content: center;
-                    // background-color: #ccc;
                     .photo {
                         border-width: 1px;
                         border-color: rgba(0,0,0,.4);
                         border-style: solid;
-                        max-height: 100%;
                     }
                 }
             }
@@ -124,19 +124,17 @@
                 type: Number,
                 default: 3
             },
-            width: {
-                type: Number,
-                default: 200,
-                validator: function(value) {
-                    return value > 0;
-                }
-            },
             height: {
                 type: Number,
                 default: 400,
                 validator: function(value) {
                     return value > 0;
                 }
+            },
+            // 宽比高
+            ratio: {
+                type: Number,
+                default: 0.5
             },
             photosGap: {
                 type: Number,
@@ -161,8 +159,6 @@
         },
         data() {
             return {
-                // 每次滑动的距离
-                slidingDistance: this.photosGap + this.width,
                 // 已经缓存的 photo 在 photoList 中的索引记录
                 photoListRecord: {
                     initIndex: 0,
@@ -185,16 +181,12 @@
                     showUrls: [],
                     opacity: 1
                 },
-                // css 样式
-                previewWidth: this.width * this.showNumber + this.photosGap * (this.showNumber + 1) + 80,
-                photoSliderWrapWidth: this.showNumber * this.width + this.photosGap * (this.showNumber - 1),
+                // photoSliderWrapWidth: ,
                 leftPhotoStyle: {
-                    width: this.width + 'px',
                     height: this.height + 'px',
                     marginLeft: this.photosGap + 'px'
                 },
                 rightPhotoStyle: {
-                    width: this.width + 'px',
                     height: this.height + 'px',
                     marginRight: this.photosGap + 'px'
                 }
@@ -209,6 +201,23 @@
             }
         },
         computed: {
+            // 每次滑动的距离
+            slidingDistance: {
+                get () {
+                    return this.photosGap + this.width;
+                }
+            },
+            // css 样式
+            previewWidth: {
+                get () {
+                    return this.width * this.showNumber + this.photosGap * (this.showNumber + 1) + 80;
+                }
+            },
+            width: {
+                get () {
+                    return this.height * this.ratio
+                }
+            },
             _value: {
                 get () {
                     return this.value;
@@ -394,7 +403,19 @@
                 return newIndex <= this.photoList.length - 1
                     && newIndex >= 0
                     && (this.photoListRecord.leftIndex != this.photoListRecord.rightIndex && (newIndex < this.photoListRecord.leftIndex || newIndex > this.photoListRecord.rightIndex));
-            }
+            },
+            // photoHeightWidth() {
+            //     let img_url = 'http://object.appspeed.baidu-int.com/backlog-113/2bc5fa1a8a8c1b3e4f1d06b6587e028b/16bba03437d794ab1e2dc6cfaf6fde7b/image-053.jpg';
+            //     let img = new Image();
+            //     img.src = img_url;
+            //     if (img.complete) {
+            //         console.log('width: ', img.width, 'height: ', img.height);
+            //     } else {
+            //         img.onload = function() {
+            //             console.log('width: ', img.width, 'height: ', img.height);
+            //         }
+            //     }
+            // }
         },
         created() {
             // 1. 设置宽度
@@ -404,6 +425,8 @@
             }
             // 2. 验证纠正 props 的值
             this.init();
+            console.log("this.width:", this.width);
+            console.log("slidingDistance:", this.slidingDistance);
         }
     }
 </script>

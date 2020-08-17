@@ -3,8 +3,8 @@
     <image-preview
       v-model="value"
       :showNumber="3"
-      :width="282"
       :height="500"
+      :ratio="0.5"
       :photosGap="10"
       :photoList="photoUrlsArr"
       @on-change="changeImage">
@@ -44,7 +44,7 @@ export default {
         "/imgs/10.png",
         "/imgs/11.png"
       ],
-      value: 5
+      value: 6
     }
   },
   components: {
