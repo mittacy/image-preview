@@ -131,10 +131,12 @@
                     return value > 0;
                 }
             },
-            // 宽比高
-            ratio: {
+            width: {
                 type: Number,
-                default: 0.5
+                default: 200,
+                validator: function(value) {
+                    return value > 0;
+                }
             },
             photosGap: {
                 type: Number,
@@ -155,33 +157,35 @@
                 validator: function(value) {
                     return value >= 0;
                 }
+            },
+            sliderNum: {
+                type: Number,
+                default: 1,
+                validator: function(value) {
+                    return value >= 0;
+                }
             }
         },
         data() {
             return {
-                // 已经缓存的 photo 在 photoList 中的索引记录
                 photoListRecord: {
                     initIndex: 0,
                     leftIndex: 0,
                     rightIndex: 0
                 },
-                // 当前的value
                 oldValue: 1,
-                // 当前操控的滑块
                 currentSilder: this.rightSlider,
-                // 左滑块
                 leftSlider: {
                     active: true,
                     showUrls: [],
                     opacity: 0,
                 },
-                // 右滑块
                 rightSlider: {
                     active: true,
                     showUrls: [],
                     opacity: 1
                 },
-                // photoSliderWrapWidth: ,
+                cacheNum: this.sliderNum * 2,
                 leftPhotoStyle: {
                     height: this.height + 'px',
                     marginLeft: this.photosGap + 'px'
@@ -201,21 +205,14 @@
             }
         },
         computed: {
-            // 每次滑动的距离
             slidingDistance: {
                 get () {
                     return this.photosGap + this.width;
                 }
             },
-            // css 样式
             previewWidth: {
                 get () {
                     return this.width * this.showNumber + this.photosGap * (this.showNumber + 1) + 80;
-                }
-            },
-            width: {
-                get () {
-                    return this.height * this.ratio
                 }
             },
             _value: {
@@ -224,19 +221,18 @@
                 },
                 set (value) {
                     this.$emit('input', value);
-                    if (value - this.oldValue === 1) {
+                    if (value - this.oldValue > 0) {
                         this.setSlider(false);
                     }
-                    else if (value - this.oldValue === -1) {
+                    else if (value - this.oldValue < 0) {
                         this.setSlider(true);
                     }
-                    // 4. 更新 value
                     this.oldValue = value;
                 }
             },
             isLeftEnd: {
                 get() {
-                    return this.value <= 1;
+                    return this.value - 1 <= 0;
                 }
             },
             isRightEnd: {
@@ -278,14 +274,14 @@
                 this.photoListRecord.initIndex = this.value;
                 // 左尽头
                 if (this.isLeftEnd) {
-                    this.setLeftRightIndex(0, this.showNumber);
+                    this.setLeftRightIndex(0, this.showNumber + this.cacheNum - 1);
                 }
                 // 右尽头
                 else if (this.isRightEnd) {
-                    this.setLeftRightIndex(this.value - 2, this.photoList.length - 1);
+                    this.setLeftRightIndex(this.value - this.cacheNum - 1, this.photoList.length - 1);
                 }
                 else {
-                    this.setLeftRightIndex(this.value - 2, this.value + this.showNumber - 1);
+                    this.setLeftRightIndex(this.value - this.cacheNum - 1, this.value + this.showNumber + this.cacheNum - 2);
                 }
             },
             // number = 0 | 1 | 2
@@ -294,7 +290,6 @@
             // 2 都开启
             closeSlider(number) {
                 if (number === 0) {
-                    console.log("关闭左滑块");
                     this.leftSlider.active = false;
                     this.leftSlider.opacity = 0;
                     this.rightSlider.active = true;
@@ -302,7 +297,6 @@
                     this.currentSilder = this.rightSlider;
                 }
                 else if (number === 1) {
-                    console.log("关闭右滑块");
                     this.leftSlider.active = true;
                     this.leftSlider.opacity = 1;
                     this.rightSlider.active = false;
@@ -333,8 +327,8 @@
                 // 两个滑块
                 else {
                     this.closeSlider(2);
-                    let leftArr = this.photoList.slice(this.photoListRecord.leftIndex, this.photoListRecord.rightIndex);
-                    let rightArr = this.photoList.slice(this.photoListRecord.leftIndex + 1, this.photoListRecord.rightIndex + 1);
+                    let leftArr = this.photoList.slice(this.photoListRecord.leftIndex, this.photoListRecord.initIndex + this.showNumber - 1);
+                    let rightArr = this.photoList.slice(this.photoListRecord.initIndex - 1, this.photoListRecord.rightIndex + 1);
                     this.leftSlider.showUrls = leftArr;
                     this.rightSlider.showUrls = rightArr;
                 }
@@ -349,11 +343,34 @@
                     return;
                 }
                 if (isLeftButton) {
-                    this._value = this.value - 1;
-                } else {
-                    this._value = this.value + 1;
+                    // 左尽头如果不够滑片，控制移动到尽头
+                    if (this.value - this.sliderNum < 1) {
+                        this._value = 1;
+                        return;
+                    }
+                    // 需要切换滑片时
+                    if (this.rightSlider.opacity === 1
+                        && this.value > this.photoListRecord.initIndex
+                        && this.value < this.photoListRecord.initIndex + this.sliderNum) {
+                        this._value = this.photoListRecord.initIndex;
+                        return;
+                    }
+                    this._value = this.value - this.sliderNum;
+                    return;
                 }
-                // this.setSlider(isLeftButton);
+                // 右尽头如果不够滑片，控制移动到尽头
+                if (this.value + this.sliderNum > this.photoList.length - this.showNumber + 1) {
+                    this._value = this.photoList.length - this.showNumber + 1;
+                    return;
+                }
+                // 需要切换滑片时
+                if (this.leftSlider.opacity === 1
+                    && this.value < this.photoListRecord.initIndex
+                    && this.value > this.photoListRecord.initIndex - this.sliderNum) {
+                    this._value = this.photoListRecord.initIndex;
+                    return;
+                }
+                this._value = this.value + this.sliderNum;
             },
             // 设置滑片的显示隐藏 以及 新增卡片
             setSlider(isLeftButton) {
@@ -371,6 +388,9 @@
                 })
             },
             setLeftRightIndex(left, right) {
+                if (left < 0) {
+                    left = 0;
+                }
                 this.photoListRecord.leftIndex = left;
                 this.photoListRecord.rightIndex = right;
             },
@@ -380,42 +400,38 @@
                 this.currentSilder.opacity = 1;
             },
             addPhoto(isLeftButton) {
-                let newIndex = 0;
-                if (!isLeftButton) {
-                    newIndex = this.value + this.showNumber - 1;
-                } else {
-                    newIndex = this.value - 2;
-                }
-                if (!this.isNeedAddPhoto(newIndex)) {
-                    return;
-                }
-                // 点击左箭头，向右滑动，在左边添加卡片
+                let newLeftIndex, newRightIndex;
                 if (isLeftButton) {
-                    this.currentSilder.showUrls = [this.photoList[newIndex]].concat(this.currentSilder.showUrls);
-                    this.photoListRecord.leftIndex = newIndex;
+                    newRightIndex = this.value - 2 - this.sliderNum;
+                    if (!this.isNeedAddPhoto(true, newRightIndex)) {
+                        return;
+                    }
+                    newLeftIndex = newRightIndex - this.sliderNum + 1;
+                    if (newLeftIndex < 0) {
+                        newLeftIndex = 0;
+                    }
+                    this.currentSilder.showUrls = this.photoList.slice(newLeftIndex, newRightIndex + 1).concat(this.currentSilder.showUrls);
+                    this.photoListRecord.leftIndex = newLeftIndex;
                     return;
                 }
-                // 点击右箭头，向左滑动，在右边添加卡片
-                this.currentSilder.showUrls = this.currentSilder.showUrls.concat(this.photoList[newIndex]);
-                this.photoListRecord.rightIndex = newIndex;
+                newLeftIndex = this.value + this.showNumber - 1 + this.sliderNum;
+                if (!this.isNeedAddPhoto(false, newLeftIndex)) {
+                    return;
+                }
+                newRightIndex = newLeftIndex + this.sliderNum - 1;
+                this.currentSilder.showUrls = this.currentSilder.showUrls.concat(this.photoList.slice(newLeftIndex, newRightIndex+1));
+                this.photoListRecord.rightIndex = newRightIndex;
             },
-            isNeedAddPhoto(newIndex) {
+            isNeedAddPhoto(isLeftButton, newIndex) {
+                if (isLeftButton) {
+                    return newIndex <= this.photoList.length - 1
+                        && newIndex >= 0
+                        && (this.photoListRecord.leftIndex != this.photoListRecord.rightIndex && newIndex < this.photoListRecord.leftIndex);
+                }
                 return newIndex <= this.photoList.length - 1
                     && newIndex >= 0
-                    && (this.photoListRecord.leftIndex != this.photoListRecord.rightIndex && (newIndex < this.photoListRecord.leftIndex || newIndex > this.photoListRecord.rightIndex));
-            },
-            // photoHeightWidth() {
-            //     let img_url = 'http://object.appspeed.baidu-int.com/backlog-113/2bc5fa1a8a8c1b3e4f1d06b6587e028b/16bba03437d794ab1e2dc6cfaf6fde7b/image-053.jpg';
-            //     let img = new Image();
-            //     img.src = img_url;
-            //     if (img.complete) {
-            //         console.log('width: ', img.width, 'height: ', img.height);
-            //     } else {
-            //         img.onload = function() {
-            //             console.log('width: ', img.width, 'height: ', img.height);
-            //         }
-            //     }
-            // }
+                    && (this.photoListRecord.leftIndex != this.photoListRecord.rightIndex && newIndex > this.photoListRecord.rightIndex);
+            }
         },
         created() {
             // 1. 设置宽度
@@ -425,8 +441,6 @@
             }
             // 2. 验证纠正 props 的值
             this.init();
-            console.log("this.width:", this.width);
-            console.log("slidingDistance:", this.slidingDistance);
         }
     }
 </script>

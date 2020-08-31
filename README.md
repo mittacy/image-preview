@@ -17,8 +17,6 @@
    </head>
    ```
 
-   
-
 2. 将 src/components 目录下的 ImagePreview 文件复制到项目的 src/components 目录或其他位置
 
 3. 在需要引入该组件的 vue 文件中导入
@@ -33,6 +31,7 @@
          :photosGap="10"
          :value="1"
          :photoList="photoUrlsArr"
+   			:sliderNum="sliderNum"
          @on-change="changeImage">
        </image-preview>
      </div>
@@ -79,6 +78,7 @@
 | photosGap  | 两张卡片之间的间隙                      |          | 10     | >0                         |
 | value      | 初始化卡片索引(即加载时出现的img是哪张) |          | 1      | 0<=val<=photoList.length-1 |
 | photoList  | 卡片地址数组                            |          | []     |                            |
+| sliderNum  | 每次滑动多少张图片                      |          | 1      | >=1                        |
 
 ### methods
 
@@ -121,12 +121,14 @@ changeShowUrls(isLeft) {
 
 
 
-imagePreview 组件每次只会缓存 showNumber+2 张图片，当showNumber=3时如下，将隐藏关闭：
+imagePreview 组件每次只会缓存 showNumber+4*sliderNum 张图片
+
+当showNumber=3，sliderNum=1时如下，将隐藏关闭：
 
 ![3show-dishidden](src/assets/imgs/3show-dishidden.png)
 
-其实展示了5张图片，将超出的隐藏：
+其实展示了7张图片，将超出的隐藏：
 
 ![3showhidden](src/assets/imgs/3showhidden.jpg)
 
-每次点击左右按钮滑动的时候，只要操作 showUrls，保持每次都只展示 showNumber+2 张图片，加快页面加载速度
+每次点击左右按钮滑动的时候，只要操作 showUrls，保持每次都只展示 showNumber+4*sliderNum 张图片，加快页面加载速度
