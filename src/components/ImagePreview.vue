@@ -196,14 +196,6 @@
                 }
             }
         },
-        watch: {
-            _value() {
-                // 外部组件修改value
-                if (this.value != this.oldValue) {
-                    this.init();
-                }
-            }
-        },
         computed: {
             slidingDistance() {
                 return this.photosGap + this.width;
@@ -250,8 +242,11 @@
                 }
             },
             // 初始化 缓存左右索引记录 和 左右滑片
-            init() {
+            init(val) {
                 this.verifyProps();
+                if (!(typeof val === "undefined")) {
+                    this._value = val;
+                }
                 this.$nextTick(() => {
                     this.initPhotoListRecord();
                     this.initSliders();
