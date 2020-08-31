@@ -11,7 +11,11 @@
             :style="{height: height + 'px', width: this.showNumber * this.width + this.photosGap * (this.showNumber - 1) + 'px'}">
             <div
                 class="photo-slider-hidden"
-                :style="{height: height + 'px', width: this.showNumber * this.width + this.photosGap * (this.showNumber - 1) + 'px'}">
+                :style="{
+                    height: height + 'px',
+                    width: this.showNumber * this.width + this.photosGap * (this.showNumber - 1) + 'px',
+                    transition: 'opacity .3s ease-out 0s',
+                    opacity: initAnimation}">
                 <div
                     class="photo-slider"
                     :style="{
@@ -193,7 +197,8 @@
                 rightPhotoStyle: {
                     height: this.height + 'px',
                     marginRight: this.photosGap + 'px'
-                }
+                },
+                initAnimation: 1
             }
         },
         computed: {
@@ -245,7 +250,15 @@
             init(val) {
                 this.verifyProps();
                 if (!(typeof val === "undefined")) {
+                    this.initAnimation = 0;
+                    let that = this;
                     this._value = val;
+                    setTimeout(function() {
+                        that.initPhotoListRecord();
+                        that.initSliders();
+                        that.initAnimation = 1;
+                    }, 500);
+                    return;
                 }
                 this.$nextTick(() => {
                     this.initPhotoListRecord();
