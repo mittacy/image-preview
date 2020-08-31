@@ -162,7 +162,7 @@
                 type: Number,
                 default: 1,
                 validator: function(value) {
-                    return value >= 0;
+                    return value >= 1;
                 }
             }
         },
@@ -205,15 +205,11 @@
             }
         },
         computed: {
-            slidingDistance: {
-                get () {
-                    return this.photosGap + this.width;
-                }
+            slidingDistance() {
+                return this.photosGap + this.width;
             },
-            previewWidth: {
-                get () {
-                    return this.width * this.showNumber + this.photosGap * (this.showNumber + 1) + 80;
-                }
+            previewWidth() {
+                return this.width * this.showNumber + this.photosGap * (this.showNumber + 1) + 80;
             },
             _value: {
                 get () {
@@ -230,25 +226,17 @@
                     this.oldValue = value;
                 }
             },
-            isLeftEnd: {
-                get() {
-                    return this.value - 1 <= 0;
-                }
+            isLeftEnd() {
+                return this.value - 1 <= 0;
             },
-            isRightEnd: {
-                get() {
-                    return this.value + this.showNumber > this.photoList.length;
-                }
+            isRightEnd() {
+                return this.value + this.showNumber > this.photoList.length;
             },
-            leftSliderLocation: {
-                get() {
-                    return (this.value - this.photoListRecord.initIndex) * this.slidingDistance;
-                }
+            leftSliderLocation() {
+                return (this.value - this.photoListRecord.initIndex) * this.slidingDistance;
             },
-            rightSliderLocation: {
-                get() {
-                    return - (this.value - this.photoListRecord.initIndex) * this.slidingDistance;
-                }
+            rightSliderLocation() {
+                return - (this.value - this.photoListRecord.initIndex) * this.slidingDistance;
             }
         },
         methods: {
