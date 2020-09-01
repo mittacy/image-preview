@@ -8,7 +8,9 @@
         </div>
         <div
             class="photo-slider-wrap"
-            :style="{height: height + 'px', width: this.showNumber * this.width + this.photosGap * (this.showNumber - 1) + 'px'}">
+            :style="{
+                height: height + 'px',
+                width: this.showNumber * this.width + this.photosGap * (this.showNumber - 1) + 'px'}">
             <div
                 class="photo-slider-hidden"
                 :style="{
@@ -26,12 +28,13 @@
                     <div
                         class="photo-wrap"
                         :style="[leftPhotoStyle, {width: width + 'px'}]"
-                        v-for="(photoUrl, index) in leftSlider.showUrls"
+                        v-for="(photo, index) in leftSlider.showUrls"
                         :key="index">
                         <img
                             class="photo"
+                            :class="{'photo-active': photo === photoList[value]}"
                             :style="{width: width + 'px', height: height + 'px'}"
-                            :src="photoUrl"/>
+                            :src="photo"/>
                     </div>
                 </div>
                 <div
@@ -44,12 +47,13 @@
                     <div
                         class="photo-wrap"
                         :style="[rightPhotoStyle, {width: width + 'px'}]"
-                        v-for="(photoUrl, index) in rightSlider.showUrls"
+                        v-for="(photo, index) in rightSlider.showUrls"
                         :key="index">
                         <img
                             class="photo"
+                            :class="{'photo-active': photo === photoList[value]}"
                             :style="{width: width + 'px', height: height + 'px'}"
-                            :src="photoUrl"/>
+                            :src="photo"/>
                     </div>
                 </div>
             </div>
@@ -64,60 +68,64 @@
 </template>
 
 <style lang="less" scoped>
-.photo-preview {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    user-select: none;
-    .arrow {
+    .photo-preview {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
+        flex-direction: row;
         align-items: center;
-        width: 40px;
-        height: 100%;
-        color: #333;
-        transition: background-color .3s;
-        font-size: 30px;
-        cursor: pointer;
-    }
-    .arrow-active:hover {
-        color: rgb(81, 90, 110);
-    }
-    .arrow-unactive {
-        color: rgb(81, 90, 110);
-        cursor: no-drop;
-    }
-    .iconfont {
-        font-size: 20px;
-    }
-    .photo-slider-wrap {
-        margin: 0 auto;
-        .photo-slider-hidden {
-            position: relative;
-            overflow: hidden;
-            .photo-slider {
-                position: absolute;
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                align-items: center;
-                .photo-wrap {
+        justify-content: space-between;
+        width: 100%;
+        user-select: none;
+        .arrow {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 100%;
+            cursor: pointer;
+            font-size: 30px;
+            color: #333;
+            transition: background-color .3s;
+        }
+        .arrow-active:hover {
+            color: rgb(81, 90, 110);
+        }
+        .arrow-unactive {
+            color: rgb(81, 90, 110);
+            cursor: no-drop;
+        }
+        .iconfont {
+            font-size: 20px;
+        }
+        .photo-slider-wrap {
+            margin: 0 auto;
+            .photo-slider-hidden {
+                position: relative;
+                overflow: hidden;
+                .photo-slider {
+                    position: absolute;
                     display: flex;
                     flex-direction: row;
                     justify-content: center;
-                    .photo {
-                        border-width: 1px;
-                        border-color: rgba(0,0,0,.4);
-                        border-style: solid;
+                    align-items: center;
+                    .photo-wrap {
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: center;
+                        .photo {
+                            border-width: 1px;
+                            border-color: rgba(0,0,0,.4);
+                            border-style: solid;
+                        }
+                        .photo-active {
+                            border: 3px solid #ed4015;
+                            border-width: 3px;
+                        }
                     }
                 }
             }
         }
     }
-}
 </style>
 
 <script>
@@ -177,7 +185,6 @@
                     leftIndex: 0,
                     rightIndex: 0
                 },
-                oldValue: 1,
                 currentSilder: this.rightSlider,
                 leftSlider: {
                     active: true,
@@ -214,13 +221,6 @@
                 },
                 set (value) {
                     this.$emit('input', value);
-                    if (value - this.oldValue > 0) {
-                        this.setSlider(false);
-                    }
-                    else if (value - this.oldValue < 0) {
-                        this.setSlider(true);
-                    }
-                    this.oldValue = value;
                 }
             },
             isLeftEnd() {
@@ -239,20 +239,23 @@
         methods: {
             verifyProps() {
                 // 校验纠正 value，由于 value 的卡片始终位于第二个可见位，所以 1 <= value <= this.photoList.length - this.showNumber + 1
-                if (this.value < 1) {
-                    this._value = 1;
+                this._value = this.verifyVal(this.value);
+            },
+            verifyVal(val) {
+                if (val < 1) {
+                    return 1;
                 }
                 else if (this.value > this.photoList.length - this.showNumber + 1) {
-                    this._value = this.photoList.length - this.showNumber + 1;
+                    return this._value = this.photoList.length - this.showNumber + 1;
                 }
+                return val;
             },
             // 初始化 缓存左右索引记录 和 左右滑片
             init(val) {
-                this.verifyProps();
                 if (!(typeof val === "undefined")) {
                     this.initAnimation = 0;
                     let that = this;
-                    this._value = val;
+                    this._value = this.verifyVal(val);
                     setTimeout(function() {
                         that.initPhotoListRecord();
                         that.initSliders();
@@ -260,13 +263,13 @@
                     }, 500);
                     return;
                 }
+                this.verifyProps();
                 this.$nextTick(() => {
                     this.initPhotoListRecord();
                     this.initSliders();
                 });
             },
             initPhotoListRecord() {
-                this.oldValue = this.value;
                 this.photoListRecord.initIndex = this.value;
                 // 左尽头
                 if (this.isLeftEnd) {
@@ -342,31 +345,33 @@
                     // 左尽头如果不够滑片，控制移动到尽头
                     if (this.value - this.sliderNum < 1) {
                         this._value = 1;
-                        return;
                     }
                     // 需要切换滑片时
-                    if (this.rightSlider.opacity === 1
+                    else if (this.rightSlider.opacity === 1
                         && this.value > this.photoListRecord.initIndex
                         && this.value < this.photoListRecord.initIndex + this.sliderNum) {
                         this._value = this.photoListRecord.initIndex;
-                        return;
                     }
-                    this._value = this.value - this.sliderNum;
-                    return;
+                    else {
+                        this._value = this.value - this.sliderNum;
+                    }
                 }
-                // 右尽头如果不够滑片，控制移动到尽头
-                if (this.value + this.sliderNum > this.photoList.length - this.showNumber + 1) {
-                    this._value = this.photoList.length - this.showNumber + 1;
-                    return;
+                else {
+                    // 右尽头如果不够滑片，控制移动到尽头
+                    if (this.value + this.sliderNum > this.photoList.length - this.showNumber + 1) {
+                        this._value = this.photoList.length - this.showNumber + 1;
+                    }
+                    // 需要切换滑片时
+                    else if (this.leftSlider.opacity === 1
+                        && this.value < this.photoListRecord.initIndex
+                        && this.value > this.photoListRecord.initIndex - this.sliderNum) {
+                        this._value = this.photoListRecord.initIndex;
+                    }
+                    else {
+                        this._value = this.value + this.sliderNum;
+                    }
                 }
-                // 需要切换滑片时
-                if (this.leftSlider.opacity === 1
-                    && this.value < this.photoListRecord.initIndex
-                    && this.value > this.photoListRecord.initIndex - this.sliderNum) {
-                    this._value = this.photoListRecord.initIndex;
-                    return;
-                }
-                this._value = this.value + this.sliderNum;
+                this.setSlider(isLeftButton);
             },
             // 设置滑片的显示隐藏 以及 新增卡片
             setSlider(isLeftButton) {
